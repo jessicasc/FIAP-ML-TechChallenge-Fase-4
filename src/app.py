@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
+from tensorflow.keras.models import load_model
 import yfinance as yf
 import numpy as np
 import joblib
-from tensorflow.keras.models import load_model
+import time
 
 # iniciar api
 app = FastAPI()
@@ -13,11 +14,102 @@ model = load_model("src/model.h5")
 
 scaler = joblib.load("src/scaler.pkl")
 
-# rota inicial para digitar o ticker
+# rota inicial com frontend para entrada e saída dos dados
 @app.get("/", response_class=HTMLResponse)
-def home():
+def home(ticker: str = None):
 
-    return """
+    prediction_text = ""
+
+    if ticker:
+
+        try:
+
+            start_time = time.time()
+
+            print(f"Nova requisição recebida, ticker: {ticker}")
+
+            # baixar dados dos ultimos 120 dias corridos
+            df = yf.download(ticker, period="120d")
+
+            data = df[['Close']]
+
+            print(f"{len(data)} registros baixados da yfinance")
+
+            # normalizacao
+            scaled_data = scaler.transform(data)
+
+            # ultimos 60 registros
+            last_sequence = scaled_data[-60:]
+
+            # formato (1, 60, 1)
+            X = np.array([last_sequence])
+
+            # previsao
+            prediction = model.predict(X)
+
+            # desnormalizar
+            prediction = scaler.inverse_transform(prediction)
+
+            predicted_price = prediction[0][0]
+
+            # log tempo de resposta
+            end_time = time.time()
+
+            response_time = end_time - start_time
+
+            print(f"Preço previsto: {predicted_price:.2f}")
+
+            print(f"Tempo resposta: {response_time:.4f} segundos")
+
+            # resultado HTML
+            prediction_text = f"""
+
+                <div
+                    style="
+                        margin-top: 30px;
+                        padding: 20px;
+                        border: 1px solid #ccc;
+                        border-radius: 10px;
+                        width: 400px;
+                    "
+                >
+
+                    <p style="font-size: 18px; color: black;">
+                        Previsão de preço de fechamento: {predicted_price:.2f}
+                    </p>
+
+                </div>
+
+            """
+
+        except Exception as e:
+
+            print(f"ERRO: {str(e)}")
+
+            prediction_text = f"""
+
+                <div
+                    style="
+                        margin-top: 30px;
+                        padding: 20px;
+                        border: 1px solid red;
+                        border-radius: 10px;
+                        width: 400px;
+                    "
+                >
+
+                    <h3>
+                        Erro ao processar previsão
+                    </h3>
+
+                    <p>{str(e)}</p>
+
+                </div>
+
+            """
+
+    return f"""
+
     <html>
 
         <head>
@@ -28,7 +120,7 @@ def home():
 
             <h1>FIAP TC4 - Previsão de preço de ações com LSTM</h1>
 
-            <form action="/predict" method="get">
+            <form action="/" method="get">
 
                 <input
                     type="text"
@@ -41,52 +133,72 @@ def home():
                     Prever
                 </button>
 
-            </form>
+            </form>              
+
+            {prediction_text}
 
         </body>
 
     </html>
+
     """
 
-# rota predict recebe o ticker e retorna o preço futuro
+# rota /predict para consumo de outras aplicações retorna json
 @app.get("/predict")
-
 def predict(ticker: str):
 
-    try:
+    start_time = time.time()
 
-        # baixar dados dos ultimos 120 dias corridos
-        df = yf.download(ticker, period="120d")
+    print("=" * 50)
+    print(f"Nova requisição API")
+    print(f"Ticker: {ticker}")
 
-        if df.empty:
-            raise HTTPException(status_code=404, detail="Ticker não encontrado")
+    # baixar dados
+    df = yf.download(
+        ticker,
+        period="120d"
+    )
 
-        data = df[['Close']]
+    data = df[['Close']]
 
-        # normalizacao
-        scaled_data = scaler.transform(data)
+    # normalizar
+    scaled_data = scaler.transform(data)
 
-        # ultimos 60 registros
-        last_sequence = scaled_data[-60:]
+    # últimos 60 dias
+    last_sequence = scaled_data[-60:]
 
-        # formato (1, 60, 1)
-        X = np.array([last_sequence])
+    X = np.array([last_sequence])
 
-        # previsao
-        prediction = model.predict(X)
+    # previsão
+    prediction = model.predict(X)
 
-        # desnormalizar
-        predicted_price = scaler.inverse_transform(prediction)[0][0]
+    prediction = scaler.inverse_transform(
+        prediction
+    )
 
-        # retorno
-        return {
-            "ticker": ticker,
-            "predicted_price": round(float(predicted_price), 2)
-        }
+    predicted_price = prediction[0][0]
 
-    except Exception as e:
+    end_time = time.time()
 
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
+    response_time = end_time - start_time
+
+    print(f"Preço previsto: {predicted_price:.2f}")
+
+    print(
+        f"Tempo resposta: "
+        f"{response_time:.4f} segundos"
+    )
+
+    print("=" * 50)
+
+    return {
+        "ticker": ticker,
+        "predicted_price": round(
+            float(predicted_price),
+            2
+        ),
+        "response_time_seconds": round(
+            response_time,
+            4
         )
+    }

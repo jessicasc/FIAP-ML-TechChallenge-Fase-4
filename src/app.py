@@ -66,15 +66,15 @@ def home(ticker: str = None):
 
                 <div
                     style="
-                        margin-top: 30px;
+                        margin-top: 20px;
                         padding: 20px;
                         border: 1px solid #ccc;
                         border-radius: 10px;
-                        width: 400px;
+                        width: 350px;
                     "
                 >
 
-                    <p style="font-size: 18px; color: black;">
+                    <p style="font-size: 16px; color: black;">
                         Previsão de preço de fechamento: {predicted_price:.2f}
                     </p>
 
@@ -90,11 +90,11 @@ def home(ticker: str = None):
 
                 <div
                     style="
-                        margin-top: 30px;
+                        margin-top: 20px;
                         padding: 20px;
                         border: 1px solid red;
                         border-radius: 10px;
-                        width: 400px;
+                        width: 350px;
                     "
                 >
 
@@ -149,56 +149,43 @@ def predict(ticker: str):
 
     start_time = time.time()
 
-    print("=" * 50)
-    print(f"Nova requisição API")
-    print(f"Ticker: {ticker}")
+    print(f"Nova requisição recebida, ticker: {ticker}")
 
-    # baixar dados
-    df = yf.download(
-        ticker,
-        period="120d"
-    )
+    # baixar dados dos ultimos 120 dias corridos
+    df = yf.download(ticker,period="120d")
 
     data = df[['Close']]
 
-    # normalizar
+    print(f"{len(data)} registros baixados da yfinance")
+
+    # normalizacao
     scaled_data = scaler.transform(data)
 
-    # últimos 60 dias
+    # ultimos 60 registros
     last_sequence = scaled_data[-60:]
 
+    # formato (1, 60, 1)
     X = np.array([last_sequence])
 
-    # previsão
+    # previsao
     prediction = model.predict(X)
 
-    prediction = scaler.inverse_transform(
-        prediction
-    )
+    # desnormalizar
+    prediction = scaler.inverse_transform(prediction)
 
     predicted_price = prediction[0][0]
 
+    # log tempo de resposta
     end_time = time.time()
 
     response_time = end_time - start_time
 
     print(f"Preço previsto: {predicted_price:.2f}")
 
-    print(
-        f"Tempo resposta: "
-        f"{response_time:.4f} segundos"
-    )
-
-    print("=" * 50)
+    print(f"Tempo resposta: {response_time:.4f} segundos")
 
     return {
         "ticker": ticker,
-        "predicted_price": round(
-            float(predicted_price),
-            2
-        ),
-        "response_time_seconds": round(
-            response_time,
-            4
-        )
+        "predicted_price": round(float(predicted_price),2),
+        "response_time_seconds": round(response_time,4)
     }

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 import yfinance as yf
 import numpy as np
 import joblib
@@ -11,6 +12,41 @@ app = FastAPI()
 model = load_model("src/model.h5")
 
 scaler = joblib.load("src/scaler.pkl")
+
+# rota inicial para digitar o ticker
+@app.get("/", response_class=HTMLResponse)
+def home():
+
+    return """
+    <html>
+
+        <head>
+            <title>Previsão de ações</title>
+        </head>
+
+        <body style="font-family: Arial; padding: 40px;">
+
+            <h1>FIAP TC4 - Previsão de preço de ações com LSTM</h1>
+
+            <form action="/predict" method="get">
+
+                <input
+                    type="text"
+                    name="ticker"
+                    placeholder="Digite o ticker"
+                    required
+                >
+
+                <button type="submit">
+                    Prever
+                </button>
+
+            </form>
+
+        </body>
+
+    </html>
+    """
 
 # rota predict recebe o ticker e retorna o preço futuro
 @app.get("/predict")

@@ -2,6 +2,15 @@
 
 O objetivo do projeto foi desenvolver um modelo de redes neurais LSTM (Long Short-Term Memory) que realiza previsão do preço de fechamento dos próximos 3 dias de uma ação com base em dados históricos (60 registros) obtidos através da biblioteca `yfinance`, disponibilizando o resultado por meio de uma API RESTful desenvolvida com FastAPI.
 
+O modelo foi treinado utilizando ativos de diferentes setores econômicos (tecnologia, energia e varejo), permitindo maior diversidade de padrões temporais durante o treinamento.
+
+Após treinamento apresentou os seguintes resultados:
+- MAE: 2.33
+- RMSE: 3.90
+- MAPE: 8.54%
+
+Ativos com preços absolutos menores, como ações do setor varejista, tendem a apresentar maior erro percentual mesmo quando o erro absoluto permanece reduzido o que explica o MAPE alto, porém levando esse ponto em consideração as métricas indicam um modelo bom que erra pouco.
+
 ## Endpoints
 **/** - Interface web para demonstração  
 **/predict** - Rota que pode ser consumida por outras aplicações  

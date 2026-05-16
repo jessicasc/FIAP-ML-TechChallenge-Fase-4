@@ -50,14 +50,14 @@ def home(ticker: str = None):
             # desnormalizar
             prediction = scaler.inverse_transform(prediction)
 
-            predicted_price = prediction[0][0]
+            predicted_prices = prediction[0]
 
             # log tempo de resposta
             end_time = time.time()
 
             response_time = end_time - start_time
 
-            print(f"Preço previsto: {predicted_price:.2f}")
+            print(f"Previsões: {predicted_prices}")
 
             print(f"Tempo resposta: {response_time:.4f} segundos")
 
@@ -75,8 +75,16 @@ def home(ticker: str = None):
                 >
 
                     <p style="font-size: 16px; color: black;">
-                        Previsão de preço de fechamento: {predicted_price:.2f}
+                        Previsão de preço de fechamento para os próximos 3 dias:
                     </p>
+
+                    <ul>
+
+                        <li>Dia 1: {predicted_prices[0]:.2f}</li>
+                        <li>Dia 2: {predicted_prices[1]:.2f}</li>
+                        <li>Dia 3: {predicted_prices[2]:.2f}</li>
+
+                    </ul>
 
                 </div>
 
@@ -173,19 +181,23 @@ def predict(ticker: str):
     # desnormalizar
     prediction = scaler.inverse_transform(prediction)
 
-    predicted_price = prediction[0][0]
+    predicted_prices = prediction[0]
 
     # log tempo de resposta
     end_time = time.time()
 
     response_time = end_time - start_time
 
-    print(f"Preço previsto: {predicted_price:.2f}")
+    print(f"Previsões: {predicted_prices}")
 
     print(f"Tempo resposta: {response_time:.4f} segundos")
 
     return {
         "ticker": ticker,
-        "predicted_price": round(float(predicted_price),2),
+        "predicted_price": [
+            round(float(predicted_prices[0]), 2),
+            round(float(predicted_prices[1]), 2),
+            round(float(predicted_prices[2]), 2)    
+        ],
         "response_time_seconds": round(response_time,4)
     }

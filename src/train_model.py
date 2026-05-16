@@ -22,13 +22,14 @@ scaled_data = scaler.fit_transform(data)
 
 # criar sequencias temporais com 60 dias cada 
 sequence_length = 60
+future_days = 3
 
 X = []
 y = []
 
-for i in range(sequence_length, len(scaled_data)):
+for i in range(sequence_length, len(scaled_data)-future_days):
     X.append(scaled_data[i-sequence_length:i, 0])
-    y.append(scaled_data[i, 0])
+    y.append(scaled_data[i:i+future_days, 0])
 
 X = np.array(X)
 y = np.array(y)
@@ -56,7 +57,7 @@ model.add(LSTM(units=64))
 
 model.add(Dropout(0.2))
 
-model.add(Dense(1))
+model.add(Dense(future_days))
 
 model.compile(
     optimizer='adam',
@@ -83,8 +84,8 @@ history = model.fit(
 predictions = model.predict(X_test)
 
 # desfazer normalização
-predictions = scaler.inverse_transform(predictions.reshape(-1, 1))
-real_prices = scaler.inverse_transform(y_test.reshape(-1, 1))
+predictions = scaler.inverse_transform(predictions)
+real_prices = scaler.inverse_transform(y_test)
 
 # metricas
 mae = mean_absolute_error(real_prices, predictions)
@@ -99,10 +100,14 @@ print(f"RMSE: {rmse:.2f}")
 
 print(f"MAPE: {mape * 100:.2f}%")
 
+print("\nPróximos 3 dias previstos:")
+
+print(predictions[0])
+
 plt.figure(figsize=(14, 6))
-plt.plot(real_prices, label='Preço Real')
-plt.plot(predictions, label='Preço Previsto')
-plt.title(f'{ticker} - Real vs Previsto')
+plt.plot(real_prices[:, 0],label='Real Dia 1')
+plt.plot(predictions[:, 0],label='Previsto Dia 1')
+plt.title(f'{ticker} - Previsão Próximos 3 Dias')
 plt.xlabel('Tempo')
 plt.ylabel('Preço')
 plt.legend()

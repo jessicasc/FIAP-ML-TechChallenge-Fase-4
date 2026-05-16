@@ -72,11 +72,11 @@ def home(ticker: str = None):
                         padding: 20px;
                         border: 1px solid #ccc;
                         border-radius: 10px;
-                        width: 400px;
+                        width: 420px;
                     "
                 >
 
-                    <p style="font-size: 14px; color: black;">
+                    <p style="font-size: 16px; color: black;">
                         Previsão de preço de fechamento para os próximos 3 dias:
                     </p>
 
@@ -168,7 +168,7 @@ def predict(ticker: str):
 
     data.columns = ['Close'] 
 
-    print(f"{len(data)} registros baixados da yfinance")
+    print(f"Registros baixados da biblioteca yfinance")
 
     # normalizacao
     scaled_data = scaler.transform(data)

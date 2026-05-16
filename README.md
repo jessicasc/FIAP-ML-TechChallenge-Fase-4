@@ -1,7 +1,6 @@
 # FIAP ML Tech Challenge 4 - Previsão de preço de ações
 
-O objetivo do projeto foi desenvolver um modelo de redes neurais LSTM (Long Short-Term Memory) que realiza previsão do próximo preço de fechamento de uma ação com base 
-em dados históricos (de 60 dias atrás) obtidos através da biblioteca `yfinance`, disponibilizando o resultado por meio de uma API RESTful desenvolvida com FastAPI.
+O objetivo do projeto foi desenvolver um modelo de redes neurais LSTM (Long Short-Term Memory) que realiza previsão do preço de fechamento dos próximos 3 dias de uma ação com base em dados históricos (60 registros) obtidos através da biblioteca `yfinance`, disponibilizando o resultado por meio de uma API RESTful desenvolvida com FastAPI.
 
 ## Endpoints
 **/** - Interface web para demonstração  
@@ -13,7 +12,11 @@ em dados históricos (de 60 dias atrás) obtidos através da biblioteca `yfinanc
 **Exemplo de resposta:**  
 {  
   "ticker": "AAPL",  
-  "predicted_price": 285.18,  
+  "predicted_prices": [
+    281.21,
+    282.73,
+    284.10
+  ], 
   "response_time_seconds": 0.8421  
 }  
 

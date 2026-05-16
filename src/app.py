@@ -31,7 +31,9 @@ def home(ticker: str = None):
             # baixar dados dos ultimos 120 dias corridos
             df = yf.download(ticker, period="120d")
 
-            data = df[['Close']]
+            data = df[['Close']].copy()
+
+            data.columns = ['Close'] 
 
             print(f"{len(data)} registros baixados da yfinance")
 
@@ -70,11 +72,11 @@ def home(ticker: str = None):
                         padding: 20px;
                         border: 1px solid #ccc;
                         border-radius: 10px;
-                        width: 350px;
+                        width: 400px;
                     "
                 >
 
-                    <p style="font-size: 16px; color: black;">
+                    <p style="font-size: 14px; color: black;">
                         Previsão de preço de fechamento para os próximos 3 dias:
                     </p>
 
@@ -162,7 +164,9 @@ def predict(ticker: str):
     # baixar dados dos ultimos 120 dias corridos
     df = yf.download(ticker,period="120d")
 
-    data = df[['Close']]
+    data = df[['Close']].copy()
+
+    data.columns = ['Close'] 
 
     print(f"{len(data)} registros baixados da yfinance")
 
@@ -194,7 +198,7 @@ def predict(ticker: str):
 
     return {
         "ticker": ticker,
-        "predicted_price": [
+        "predicted_prices": [
             round(float(predicted_prices[0]), 2),
             round(float(predicted_prices[1]), 2),
             round(float(predicted_prices[2]), 2)    

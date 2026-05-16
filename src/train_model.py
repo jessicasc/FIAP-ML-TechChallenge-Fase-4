@@ -1,5 +1,6 @@
 import yfinance as yf
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import joblib
 from sklearn.preprocessing import MinMaxScaler
@@ -8,28 +9,62 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
 
+# configuracoes
+tickers = [
+    "AAPL",
+    "PETR4.SA",
+    "MGLU3.SA"
+]
+
+sequence_length = 60
+
+future_days = 3
+
 # baixar dados da biblioteca yfinance para treinamento
-ticker = "AAPL" 
 
-df = yf.download(ticker, start="2021-01-01", end="2025-12-31")
+all_data = []
 
-data = df[['Close']] # preco do fechamento
+ticker_data = {}
+
+for ticker in tickers:
+
+    print(f"Baixando dados: {ticker}")
+
+    df = yf.download(
+        ticker,
+        start="2021-01-01",
+        end="2025-12-31"
+    )
+
+    
+    data = df[['Close']].copy()
+
+    data.columns = ['Close'] 
+
+    ticker_data[ticker] = data
+
+    all_data.append(data)
+
+final_data = pd.concat(all_data, ignore_index=True)
 
 # normalizacao 
 scaler = MinMaxScaler(feature_range=(0, 1))
 
-scaled_data = scaler.fit_transform(data)
+scaler.fit(final_data)
 
 # criar sequencias temporais com 60 dias cada 
-sequence_length = 60
-future_days = 3
-
 X = []
 y = []
 
-for i in range(sequence_length, len(scaled_data)-future_days):
-    X.append(scaled_data[i-sequence_length:i, 0])
-    y.append(scaled_data[i:i+future_days, 0])
+for ticker in tickers:
+
+    data = ticker_data[ticker]
+
+    scaled_data = scaler.transform(data)
+
+    for i in range(sequence_length, len(scaled_data) - future_days):
+        X.append(scaled_data[i-sequence_length:i, 0])
+        y.append(scaled_data[i:i+future_days, 0])
 
 X = np.array(X)
 y = np.array(y)
@@ -99,10 +134,6 @@ print(f"MAE: {mae:.2f}")
 print(f"RMSE: {rmse:.2f}")
 
 print(f"MAPE: {mape * 100:.2f}%")
-
-print("\nPróximos 3 dias previstos:")
-
-print(predictions[0])
 
 plt.figure(figsize=(14, 6))
 plt.plot(real_prices[:, 0],label='Real Dia 1')

@@ -12,11 +12,11 @@ O objetivo do projeto foi desenvolver um modelo de redes neurais LSTM (Long Shor
 **Exemplo de resposta:**  
 {  
   "ticker": "AAPL",  
-  "predicted_prices": [
-    281.21,
-    282.73,
-    284.10
-  ], 
+  "predicted_prices": [  
+    281.21,  
+    282.73,  
+    284.10  
+  ],   
   "response_time_seconds": 0.8421  
 }  
 

@@ -10,7 +10,7 @@ em dados históricos (de 60 dias atrás) obtidos através da biblioteca `yfinanc
 **Exemplo de uso:**    
 /predict?ticker=AAPL  
 
-**Exemplo de resposta:** 
+**Exemplo de resposta:**  
 {  
   "ticker": "AAPL",  
   "predicted_price": 285.18,  

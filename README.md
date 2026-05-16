@@ -7,10 +7,10 @@ em dados históricos (de 60 dias atrás) obtidos através da biblioteca `yfinanc
 **/** - Interface web para demonstração  
 **/predict** - Rota que pode ser consumida por outras aplicações  
 
-Exemplo de uso: 
+**Exemplo de uso:**    
 /predict?ticker=AAPL  
 
-Exemplo de resposta:  
+**Exemplo de resposta:** 
 {  
   "ticker": "AAPL",  
   "predicted_price": 285.18,  

@@ -14,7 +14,7 @@ model = load_model("src/model.h5")
 
 scaler = joblib.load("src/scaler.pkl")
 
-# rota inicial com frontend para entrada e saída dos dados
+# rota inicial para demonstracao com frontend para entrada e saída dos dados
 @app.get("/", response_class=HTMLResponse)
 def home(ticker: str = None):
 
@@ -35,7 +35,7 @@ def home(ticker: str = None):
 
             data.columns = ['Close'] 
 
-            print(f"{len(data)} registros baixados da yfinance")
+            print("Registros baixados da biblioteca yfinance")
 
             # normalizacao
             scaled_data = scaler.transform(data)
@@ -43,7 +43,6 @@ def home(ticker: str = None):
             # ultimos 60 registros
             last_sequence = scaled_data[-60:]
 
-            # formato (1, 60, 1)
             X = np.array([last_sequence])
 
             # previsao
@@ -82,9 +81,9 @@ def home(ticker: str = None):
 
                     <ul>
 
-                        <li>Dia 1: {predicted_prices[0]:.2f}</li>
-                        <li>Dia 2: {predicted_prices[1]:.2f}</li>
-                        <li>Dia 3: {predicted_prices[2]:.2f}</li>
+                        <li>Dia 1 - {predicted_prices[0]:.2f}</li>
+                        <li>Dia 2 - {predicted_prices[1]:.2f}</li>
+                        <li>Dia 3 - {predicted_prices[2]:.2f}</li>
 
                     </ul>
 
@@ -168,7 +167,7 @@ def predict(ticker: str):
 
     data.columns = ['Close'] 
 
-    print(f"Registros baixados da biblioteca yfinance")
+    print("Registros baixados da biblioteca yfinance")
 
     # normalizacao
     scaled_data = scaler.transform(data)
@@ -176,7 +175,6 @@ def predict(ticker: str):
     # ultimos 60 registros
     last_sequence = scaled_data[-60:]
 
-    # formato (1, 60, 1)
     X = np.array([last_sequence])
 
     # previsao

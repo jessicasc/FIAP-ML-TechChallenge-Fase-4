@@ -1,10 +1,12 @@
 import yfinance as yf
 import numpy as np
 import pandas as pd
+import random
 import matplotlib.pyplot as plt
 import joblib
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
@@ -20,8 +22,11 @@ sequence_length = 60
 
 future_days = 3
 
-# baixar dados da biblioteca yfinance para treinamento
+np.random.seed(42)
+tf.random.set_seed(42)
+random.seed(42)
 
+# baixar dados da biblioteca yfinance para treinamento
 all_data = []
 
 ticker_data = {}
@@ -30,16 +35,11 @@ for ticker in tickers:
 
     print(f"Baixando dados: {ticker}")
 
-    df = yf.download(
-        ticker,
-        start="2021-01-01",
-        end="2025-12-31"
-    )
-
+    df = yf.download(ticker, start="2021-01-01", end="2025-12-31") #5 anos para treinamento
     
     data = df[['Close']].copy()
 
-    data.columns = ['Close'] 
+    data.columns = ['Close'] #preco de fechamento
 
     ticker_data[ticker] = data
 
@@ -52,7 +52,7 @@ scaler = MinMaxScaler(feature_range=(0, 1))
 
 scaler.fit(final_data)
 
-# criar sequencias temporais com 60 dias cada 
+# criar sequencias temporais com 60 registros cada 
 X = []
 y = []
 
@@ -83,8 +83,7 @@ y_test = y[train_size:]
 # criar modelo LSTM
 model = Sequential()
 
-model.add(LSTM(units=64, return_sequences=True,
-               input_shape=(X_train.shape[1], 1)))
+model.add(LSTM(units=64, return_sequences=True, input_shape=(X_train.shape[1], 1)))
 
 model.add(Dropout(0.2))
 
@@ -94,16 +93,9 @@ model.add(Dropout(0.2))
 
 model.add(Dense(future_days))
 
-model.compile(
-    optimizer='adam',
-    loss='mean_squared_error'
-)
+model.compile(optimizer='adam',loss='mean_squared_error')
 
-early_stop = EarlyStopping(
-    monitor='val_loss',
-    patience=5,
-    restore_best_weights=True
-)
+early_stop = EarlyStopping(monitor='val_loss',patience=5,restore_best_weights=True)
 
 # treinar modelo
 history = model.fit(
@@ -138,7 +130,7 @@ print(f"MAPE: {mape * 100:.2f}%")
 plt.figure(figsize=(14, 6))
 plt.plot(real_prices[:, 0],label='Real Dia 1')
 plt.plot(predictions[:, 0],label='Previsto Dia 1')
-plt.title(f'{ticker} - Previsão Próximos 3 Dias')
+plt.title(f'{ticker} - Comparativo real X previsto')
 plt.xlabel('Tempo')
 plt.ylabel('Preço')
 plt.legend()

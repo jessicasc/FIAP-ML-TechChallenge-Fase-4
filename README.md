@@ -47,6 +47,6 @@ https://fiap-ml-techchallenge-fase-4.onrender.com/docs
 - Render 
 
 Link do vídeo com demonstração do projeto:  
-  
+https://canva.link/2kf4sk4mq2xwuyn   
 
 `Jéssica Soares - RM 367045`
